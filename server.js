@@ -4,7 +4,7 @@ const express = require("express");
 const socketio = require("socket.io");
 
 const formatMessage = require("./utils/messages");
-const knex = require("./db/knex");
+const knex = require("./config/knex");
 const { userJoin, getCurrentUser, userLeave, getRoomUsers } = require("./utils/users");
 
 const roomTable = require("./utils/room");
