@@ -1,7 +1,6 @@
 {
   "name": "chatroomv2",
   "version": "1.0.0",
-  "description": "",
   "main": "server.js",
   "scripts": {
     "start": "node server",
@@ -11,7 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.18.1",
-    "knex": "^2.2.0",
+    "knex": "^2.3.0",
     "moment": "^2.29.4",
     "pg": "^8.7.3",
     "socket.io": "^4.5.1",
@@ -19,5 +18,15 @@
   },
   "devDependencies": {
     "nodemon": "^2.0.19"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/giadaunger/chatroom-backend.git"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/giadaunger/chatroom-backend/issues"
+  },
+  "homepage": "https://github.com/giadaunger/chatroom-backend#readme",
+  "description": ""
 }

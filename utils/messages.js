@@ -1,4 +1,4 @@
-const knex = require("../config/knex");
+const knex = require("../knexfile");
 
 async function createMessage(roomname, time, text) {
     try {

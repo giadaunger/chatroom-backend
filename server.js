@@ -1,10 +1,11 @@
 const path = require("path");
 const http = require("http");
 const express = require("express");
-const socketio = require("socket.io");
+//const socketio = require("socket.io");
+const cors = require("cors"); 
 
-const formatMessage = require("./utils/messages");
-const config = require("./config/knexfile.js");
+const createMessage = require("./utils/messages");
+const config = require("./knexfile");
 const knex = require("knex")(config[process.env.NODE_ENV]);
 const { userJoin, getCurrentUser, userLeave, getRoomUsers } = require("./utils/users");
 
@@ -12,7 +13,16 @@ const roomTable = require("./utils/room");
 
 const app = express();
 const server = http.createServer(app);
-const io = socketio(server);
+
+const { Server } = require("socket.io");
+const socketio = new Server(server, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST", "DELETE"]
+    }
+});
+
+app.use(cors()); 
 
 // Set static folder
 app.use(express.static(path.join(__dirname, "public")));
@@ -21,8 +31,8 @@ const botName = "ChatCord Bot";
 
 // Run when client connects
 io.on("connection", (socket) => {
-  socket.on("joinRoom", ({ username, room }) => {
-    roomTable.createRoom(room);
+  socket.on("joinRoom", async ( { username, room }) => {
+    await roomTable.createRoom(room);
     const user = userJoin(socket.id, username, room);
 
     socket.room = room;
@@ -30,14 +40,14 @@ io.on("connection", (socket) => {
     socket.join(user.room);
 
     // Welcome current user
-    socket.emit("message", formatMessage(botName, "Welcome to ChatCord!"));
+    socket.emit("message", createMessage(botName, "Welcome to ChatCord!"));
 
     // Broadcast when a user connects
     socket.broadcast
       .to(user.room)
       .emit(
         "message",
-        formatMessage(botName, `${user.username} has joined the chat`)
+        createMessage(botName, `${user.username} has joined the chat`)
       );
 
     // Send users and room info
@@ -51,17 +61,17 @@ io.on("connection", (socket) => {
   socket.on("chatMessage", (msg) => {
     const user = getCurrentUser(socket.id);
 
-    io.to(user.room).emit("message", formatMessage(user.username, msg));
+    io.to(user.room).emit("message", createMessage(user.username, msg));
   });
 
   // Runs when client disconnects
-  socket.on("disconnect", () => {
-    const user = userLeave(socket.id);
+  socket.on("disconnect",async () => {
+    const user = await userLeave(socket.id);
 
     if (user) {
       io.to(user.room).emit(
         "message",
-        formatMessage(botName, `${user.username} has left the chat`)
+        createMessage(botName, `${user.username} has left the chat`)
       );
 
       // Send users and room info
@@ -72,15 +82,10 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("delete", (room) => { 
-      roomTable.deleteRoom(room);
+  socket.on("delete", async (room) => { 
+      await roomTable.deleteRoom(room);
   });
 });
-
-app.use((req, res, next) => {
-  console.log('Time:', Date.now())
-  next()
-})
 
 const PORT = process.env.PORT || 3000;
 

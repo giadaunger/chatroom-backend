@@ -13,7 +13,7 @@ async function deleteRoom(roomname) {
 };
 
 function getAllRooms(roomname) {
-    knex.select(roomname).from("books")
+    knex.select(roomname).from("room")
 };
 
 module.exports = { 
